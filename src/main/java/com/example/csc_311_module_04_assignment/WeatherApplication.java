@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * @author Nathaniel Rivera
@@ -77,6 +78,9 @@ public class WeatherApplication extends Application {
 
             Label prec = initializePrecipitation(precipitation.get(i), i);
             root.getChildren().add(prec);
+
+            Label date = initializeDate(dates.get(i), i);
+            root.getChildren().add(date);
         }
 
         Label avgTemp = placeAverageTemperature(temperatures);
@@ -85,7 +89,11 @@ public class WeatherApplication extends Application {
         Label totalRain = placeTotalRainyDays(precipitation);
         root.getChildren().add(totalRain);
 
+        Label title = createTitle(dates.getFirst());
+        root.getChildren().add(title);
+
         Scene scene = new Scene(root, 900, 800);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("weatherpane.css")).toExternalForm());
         stage.setTitle("CSC311: Weather App");
         stage.setScene(scene);
         stage.show();
@@ -95,25 +103,23 @@ public class WeatherApplication extends Application {
         launch();
     }
 
+    /**
+     * Determines the weather category the day belongs to and returns a String of the category. Runs in O(1).
+     * @param temp The temperature of the given day.
+     * @return The weather category of the given day
+     */
     public static String determineWeatherCategory(Double temp) {
-        /*switch (temp) {
-            case 80 -> {
-                return "Hot";
-            }
-            case 70 -> {
-                return "Warm";
-            }
-            case 50 -> {
-                return "Cool";
-            }
-            case 33 -> {
-                return "Cold";
-            }
-            case 32 -> {
-                return "Freezing";
-            }
-        }*/
-        return "";
+        if(temp >= 80) {
+            return "Hot";
+        } else if (temp >= 70) {
+            return "Warm";
+        } else if (temp >= 50) {
+            return "Cool";
+        } else if (temp > 32) {
+            return "Cold";
+        } else {
+            return "Freezing";
+        }
     }
 
 
@@ -129,8 +135,9 @@ public class WeatherApplication extends Application {
         for (Double temp : temps) {
             average += temp;
         }
-
-        return (average / temps.size());
+        average = (average / temps.size()) * 100;
+        average = (int) average;
+        return average / 100;
     }
 
     /**
@@ -161,10 +168,10 @@ public class WeatherApplication extends Application {
     }
 
     /**
-     *
-     * @param isRaining
-     * @param temp
-     * @return
+     * Finds the correct choice of the Icon based on the factors of rain and temperature. Runs in O(1) time.
+     * @param isRaining Checks whether, or not there is rain on the given day
+     * @param temp The temperature of the given day
+     * @return A sun icon if it is not raining, a rain icon if it is raining and above freezing, and a snow icon when it is raining and below freezing.
      */
     public static String initializeIconType(boolean isRaining, double temp) {
 
@@ -180,7 +187,7 @@ public class WeatherApplication extends Application {
 
 
     /**
-     * Creates a new rectangle object based on the data in the ArrayList. The rectangle changes color depending on the current weather category. Runs in O(1)
+     * Creates a new rectangle object based on the data in the ArrayList. The rectangle changes color using an enhanced switch based on the current weather category. Runs in O(1)
      * @param category The weather category of the current place in the List used for coloring the rectangle
      * @param dayNum The placement of the date in the List used for arranging.
      * @return A newly created rectangle object for the position of the date.
@@ -193,7 +200,13 @@ public class WeatherApplication extends Application {
         rect.setLayoutY(147 + 120 * (dayNum / 7));
         rect.setStroke(Color.BLACK);
 
-        rect.setFill(Color.RED);
+        switch (category) {
+            case "Hot" -> rect.setFill(new Color(0.9579, 0.3228, 0.3969, 1.0));
+            case "Warm" -> rect.setFill(new Color(1.0, 0.82, 0.4, 1.0));
+            case "Cool" -> rect.setFill(new Color(0.7098, 0.9608, 1.0, 1.0));
+            case "Cold" -> rect.setFill(new Color(0.3765, 0.4118, 0.902, 1.0));
+            case "Freezing" -> rect.setFill(new Color(0.6, 0.4863, 0.949, 1.0));
+        }
         return rect;
     }
 
@@ -218,27 +231,28 @@ public class WeatherApplication extends Application {
     }
 
     /**
-     *
-     * @param date
-     * @param dayNum
-     * @return
+     * Creates a Label for the date for each given day. Runs in O(1) time.
+     * @param date A String containing the current date
+     * @param dayNum The placement of the date in the List used for arranging.
+     * @return A Label which contains the date of the given day
      */
     public static Label initializeDate(String date, int dayNum) {
         Label dateLabel = new Label();
-        dateLabel.setPrefHeight(63);
-        dateLabel.setPrefWidth(18);
-        dateLabel.setLayoutX(61 + 120 * (dayNum % 7));
-        dateLabel.setLayoutY(46 + 120 * (dayNum / 7));
+        dateLabel.setPrefWidth(75);
+        dateLabel.setPrefHeight(18);
+        dateLabel.setLayoutX(55 + 120 * (dayNum % 7));
+        dateLabel.setLayoutY(151 + 120 * (dayNum / 7));
+        dateLabel.setFont(Font.font("Franklin Gothic Demi", FontWeight.LIGHT, FontPosture.REGULAR, 13));
 
-        dateLabel.setText("");
+        dateLabel.setText(date.substring(5, 7) + "/" + date.substring(8, 10) + "/" + date.substring(0, 4));
         return dateLabel;
     }
 
     /**
-     *
-     * @param temperature
-     * @param dayNum
-     * @return
+     * Creates a Label for the temperature for each given day. Runs in O(1) time.
+     * @param temperature The temperature of the given day
+     * @param dayNum The placement of the date in the List used for arranging.
+     * @return A Label which contains the temperature of the given day
      */
     public static Label initializeTemp(Double temperature, int dayNum) {
         Label tempLabel = new Label();
@@ -253,9 +267,9 @@ public class WeatherApplication extends Application {
     }
 
     /**
-     *
-     * @param dayNum
-     * @return
+     * Creates a Label for the title for humidity for each day. Runs in O(1) time.
+     * @param dayNum The placement of the date in the List used for arranging.
+     * @return The title for Humidity of the given day
      */
     public static Label initializeHumidityTitle(int dayNum) {
         Label humidityTitle = new Label();
@@ -270,10 +284,10 @@ public class WeatherApplication extends Application {
     }
 
     /**
-     *
-     * @param humidity
-     * @param dayNum
-     * @return
+     * Creates a Label for the humidity for each given day. Runs in O(1) time.
+     * @param humidity The humidity of the given day.
+     * @param dayNum The placement of the date in the List used for arranging.
+     * @return A Label with the humidity value of the given day.
      */
     public static Label initializeHumidity(Integer humidity, int dayNum) {
         Label humidityLabel = new Label();
@@ -281,15 +295,15 @@ public class WeatherApplication extends Application {
         humidityLabel.setPrefHeight(17.6);
         humidityLabel.setLayoutX(48 + 120 * (dayNum % 7));
         humidityLabel.setLayoutY(230 + 120 * (dayNum / 7));
-        humidityLabel.setText(Integer.toString(humidity));
+        humidityLabel.setText(Integer.toString(humidity) + "%");
 
         return humidityLabel;
     }
 
     /**
-     *
-     * @param dayNum
-     * @return
+     * Creates a Label for the title for precipitation for each day. Runs in O(1) time.
+     * @param dayNum The placement of the date in the List used for arranging.
+     * @return The title for Precipitation of the given day
      */
     public static Label initializePrecipitationTitle(int dayNum) {
         Label precTitle = new Label();
@@ -304,10 +318,10 @@ public class WeatherApplication extends Application {
     }
 
     /**
-     *
-     * @param precipitation
-     * @param dayNum
-     * @return
+     * Creates a Label for the precipitation amount of the given day. Runs in O(1) time.
+     * @param precipitation The precipitation for the given day
+     * @param dayNum The placement of the date in the List used for arranging.
+     * @return A Label containing the precipitation of the given day
      */
     public static Label initializePrecipitation(Double precipitation, int dayNum) {
         Label precLabel = new Label();
@@ -320,28 +334,65 @@ public class WeatherApplication extends Application {
         return precLabel;
     }
 
-
+    /**
+     * Creates a Label for the average temperature within the month. Runs in O(n) time.
+     * @param temps An ArrayList of temperatures in the month used to call averageTemperature().
+     * @return The newly created label for the average monthly temperature.
+     */
     public static Label placeAverageTemperature(ArrayList<Double> temps) {
         Label avgTemp = new Label();
         avgTemp.setPrefHeight(20);
-        avgTemp.setPrefWidth(300);
+        avgTemp.setPrefWidth(330);
         avgTemp.setLayoutX(10);
         avgTemp.setLayoutY(775);
-        avgTemp.setText("Average Temperature for this month is: " + Double.toString(averageTemperature(temps)) + "°F");
+        avgTemp.setText("Average Temperature for this month is: " + averageTemperature(temps) + "°F");
         avgTemp.setFont(Font.font("Verdana", FontWeight.LIGHT, FontPosture.REGULAR, 12));
 
         return avgTemp;
     }
 
-    public static Label placeTotalRainyDays(ArrayList<Double> prec) {
+    /**
+     * Creates a Label for the total amount of rainy days within the month. Runs in O(n) time.
+     * @param precipitations An ArrayList of precipitations in the month used to call totalRainyDays().
+     * @return The newly created label for total rainy days.
+     */
+    public static Label placeTotalRainyDays(ArrayList<Double> precipitations) {
         Label totalRain = new Label();
         totalRain.setPrefHeight(20);
         totalRain.setPrefWidth(350);
         totalRain.setLayoutX(340);
         totalRain.setLayoutY(775);
-        totalRain.setText("Total amount of days with Precipitation this month: " + Integer.toString(totalRainyDays(prec)));
+        totalRain.setText("Total amount of days with Precipitation this month: " + totalRainyDays(precipitations));
         totalRain.setFont(Font.font("Verdana", FontWeight.LIGHT, FontPosture.REGULAR, 12));
 
         return totalRain;
+    }
+
+    /**
+     * Creates a label for the title of the sheet displaying the month that the weather report is for. Runs in O(1) time.
+     * @param date The first day in the list.
+     * @return The title label.
+     */
+    public static Label createTitle(String date) {
+        Label title = new Label();
+        title.setLayoutX(217);
+        title.setLayoutY(14);
+        title.setFont(Font.font("Gill Sans MT", FontWeight.LIGHT, FontPosture.REGULAR, 28));
+
+        switch (date.substring(5, 7)) {
+            case "01" -> title.setText("Weather Report for the Month of January");
+            case "02" -> title.setText("Weather Report for the Month of February");
+            case "03" -> title.setText("Weather Report for the Month of March");
+            case "04" -> title.setText("Weather Report for the Month of April");
+            case "05" -> title.setText("Weather Report for the Month of May");
+            case "06" -> title.setText("Weather Report for the Month of June");
+            case "07" -> title.setText("Weather Report for the Month of July");
+            case "08" -> title.setText("Weather Report for the Month of August");
+            case "09" -> title.setText("Weather Report for the Month of September");
+            case "10" -> title.setText("Weather Report for the Month of October");
+            case "11" -> title.setText("Weather Report for the Month of November");
+            case "12" -> title.setText("Weather Report for the Month of December");
+        }
+        return title;
     }
 }
