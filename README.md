@@ -1,6 +1,6 @@
 # Weather Report App
 
-The Weather Report App is a app that takes in a CSV file and outputs a weather report in the style of a calendar.
+The Weather Report App is a app that takes in a CSV file and outputs a weather report in the style of a calendar. The calendar displays the date alongside the temperature, precipitation amount and humidity for said date. It also provides a small icon for the current weather and colored boxes depending on the temperature category.
 
 ## Sections
 
@@ -16,6 +16,8 @@ By using JavaFX, Scenebuilder and CSS the calendar GUI is stylizied to give a pl
 ### CSV File
 
 The CSV file input must follow the following format (Date,Temperature,Humidity,Precipitation). The date is structored as a String reading year-day-month all in digits. The temperature is a double and is measured in degrees Farenheight. The humidity and precipitation are both integers.
+
+Example of this would be: 2025-03-10,62.3,60,0.0
 
 ### Limitations and Future Implementations
 
